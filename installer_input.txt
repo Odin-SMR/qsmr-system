@@ -1,0 +1,4 @@
+destinationFolder=/opt/MATLAB/
+agreeToLicense=yes
+outputFile=/tmp/matlab_installer.log
+

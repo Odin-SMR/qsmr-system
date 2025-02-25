@@ -1,0 +1,6 @@
+[submodule "qsmr"]
+	path = qsmr
+	url = git@github.com:Odin-SMR/qsmr.git
+[submodule "qsmr-data"]
+	path = qsmr-data
+	url = git@github.com:Odin-SMR/qsmr-data.git

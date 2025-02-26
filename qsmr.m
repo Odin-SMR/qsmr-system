@@ -43,7 +43,7 @@ function []=qsmr( source_url, target_url, target_username, target_password )
                 'Username', target_username, ...
                 'Password', target_password);
         end
-
+        disp(L2C);
         data = struct('L2', L2, 'L2I', L2I, 'L2C', strjoin(L2C, '\n'));
         response = webwrite_retry(target_url, data, options, ...
             max_retries);

@@ -31,8 +31,8 @@ RUN ./qsmrInstaller.install -inputfile installer_input.txt
 FROM mathworks/matlab-runtime-deps:R2024b AS qsmr-data
 # arts runtime deps
 RUN apt update && \
-apt install -y libblas3 liblapack3 libgomp1 && \
-rm -rf /var/lib/apt/lists/*
+    apt install -y libblas3 liblapack3 libgomp1 && \
+    rm -rf /var/lib/apt/lists/*
 COPY --from=build-arts /opt /opt
 COPY precalcInstaller /precalcInstaller
 COPY installer_input.txt /precalcInstaller
@@ -51,7 +51,7 @@ RUN /precalc/run_precalc.sh /opt/MATLAB/R2024b /QsmrData/ ${INVMODE} ${FM}
 FROM mathworks/matlab-runtime-deps:R2024b
 # arts runtime deps
 RUN apt update && \
-    apt install -y libblas3 liblapack3 libgomp1 && \
+    apt install -y --no-install-recommends libblas3 liblapack3 libgomp1 python3-boto3 && \
     rm -rf /var/lib/apt/lists/*
 # arts
 COPY --from=build-arts /opt /opt
@@ -62,5 +62,6 @@ COPY --from=qsmr-data /QsmrData /QsmrData
 # compiled qsmr
 COPY qsmrstandaloneApplication /qsmr
 WORKDIR /qsmr
-ENTRYPOINT [ "/qsmr/run_qsmr.sh", "/opt/MATLAB/R2024b" ]
-
+COPY batch_qsmr.py .
+ENTRYPOINT [ "python3" ]
+CMD [ "batch_qsmr.py" ]

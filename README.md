@@ -4,29 +4,20 @@ The pupose of this repo is to build docker images with a compiled version of qsm
 
 The reason to do this is to be able to run qmsr on any computer, without Matlab installed.
 
-## Build instructions
+## Build requirements
 
-Requirements to build the qsmr image:
+Requirements to build the qsmr image to run in AWS ECS:
 
  1. Docker
  1. Matlab with Matlab compiler
+ 1. Credentials to odin on AWS
 
 The repo consists of two submodules. To update the submodules i.e if qsmr or qsmr-data have changes to be incorporated in the build.
 ```
 git submodule update --recursive
 ```
 
-### Detailed instructions
-
- 1. Run the `compile_precalc.m` script:
-    ```
-    matlab -r compile_precalc.m
-    ```
- 1. Run the `compile_qsmr.m` script:
-    ```
-    matlab -r compile_qsmr.m
-    ```
- 1. Build docker images:
-    ```
-    docker build --build-arg FM=13 --build-arg INVMODE=meso -t qsmr:meso13 .
-    ```
+### Detailed build instructions
+```
+./deploy.sh
+```

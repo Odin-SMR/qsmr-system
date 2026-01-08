@@ -2,7 +2,7 @@
 
 # AWS & Docker Variables
 REPO="991049544436.dkr.ecr.eu-north-1.amazonaws.com/qsmr"
-AWS_PROFILE="odin-cdk"
+AWS_PROFILE="odin"
 AWS_REGION="eu-north-1"
 
 # Define FM and INVMODE combinations
@@ -24,6 +24,7 @@ for INVMODE in "${!FM_VALUES[@]}"; do
         
         docker buildx build --push \
             --build-arg FM=$FM --build-arg INVMODE=$INVMODE \
+            --target final \
             --provenance=false \
             --tag $REPO:$TAG \
             --tag $REPO:$TAG-$GIT_HASH .

@@ -1,5 +1,7 @@
 # qsmr-system
 
+** This repo is deployed manually. Please see the deploy.sh script for instructions. **
+
 The pupose of this repo is to build docker images with a compiled version of qsmr with precompile data from qsmr-data.
 
 The reason to do this is to be able to run qmsr on any computer, without Matlab installed.
@@ -12,7 +14,7 @@ Requirements to build the qsmr image to run in AWS ECS:
  1. Matlab with Matlab compiler
  1. Credentials to odin on AWS
 
-The repo consists of two submodules. To update the submodules i.e if qsmr or qsmr-data have changes to be incorporated in the build.
+The repo have two submodules. To update the submodules i.e if qsmr or qsmr-data have changes to be incorporated in the build.
 ```
 git submodule update --recursive
 ```

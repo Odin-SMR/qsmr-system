@@ -2,53 +2,63 @@
 % is provided. If not, write results to .mat files.
 % example source url:
 % http://malachite.rss.chalmers.se/rest_api/v4/freqmode_info/2015-04-01/AC2/1/7123991206/
-function []=qsmr( source_url, target_url, target_username, target_password )
 
-    Q = load('/QsmrData/Q.mat');
-    Q = Q.Q;
+function [] = qsmr()
+    % Main loop: uses Python generator to get queue messages as JSON and process them
+    ensurePythonVenv();
+    fprintf(string(py.sys.version) + "\n");
+    fprintf(string(py.sys.executable) + "\n");
 
-    disp(sprintf( 'Using Q config with freqmode %d and invmode %s and backendfile %s', ...
-                  Q.FREQMODE, Q.INVEMODE, Q.BACKEND_FILE))
+    msg_iter = py.qsmr_system.batch_qsmr.yield_queue_messages();
 
-    max_retries = 5;
-    LOG = webread_retry(source_url, weboptions('ContentType', 'json', ...
-        'Timeout', 300), max_retries);
-    if isempty(LOG)
-        disp(sprintf('Empty results from URL-input: %s', source_url));
-        exit(2)
-    end
-    if Q.FREQMODE ~= LOG.Info.FreqMode
-        disp(sprintf('Freqmode missmatch, Q: %d, LOG: %d', Q.FREQMODE, ...
-                        LOG.Info.FreqMode))
-        exit(1)
-    end
+    while true
 
-    L1B = get_scan_l1b_data(LOG.Info.URLS.URL_spectra);
-
-    [L2, L2I, L2C] = q2_inv(LOG.Info, L1B, Q);
-
-    if nargin < 2
-        save('L2.mat', 'L2');
-        save('L2I.mat', 'L2I');
-        save('L2C.mat', 'L2C');
-    else
-        if nargin < 3
-            options = weboptions( ...
-                'MediaType','application/json', ...
-                'Timeout', 300);
-        else
-            options = weboptions( ...
-                'MediaType','application/json', ...
-                'Timeout', 300, ...
-                'Username', target_username, ...
-                'Password', target_password);
+        try
+            job = py.builtins.next(msg_iter);
+        catch err
+            fprintf('No more jobs or error: %s\n', err.message);
+            pause(5);
+            continue;
         end
-        disp(strjoin(L2C, newline));
-        data = struct('L2', L2, 'L2I', L2I, 'L2C', strjoin(L2C, '\n'));
-        response = webwrite_retry(target_url, data, options, ...
-            max_retries);
+
+        source_url = string(job.task.source);
+        project = string(job.task.target);
+
+        try
+            Q = load('/QsmrData/Q.mat');
+            Q = Q.Q;
+            fprintf('Using Q config with freqmode %d and invmode %s and backendfile %s\n', ...
+                Q.FREQMODE, Q.INVEMODE, Q.BACKEND_FILE);
+
+            max_retries = 5;
+            LOG = webread_retry(source_url, weboptions('ContentType', 'json', ...
+                'Timeout', 300), max_retries);
+
+            if isempty(LOG)
+                fprintf('Empty results from URL-input: %s\n', source_url);
+                continue;
+            end
+
+            if Q.FREQMODE ~= LOG.FreqMode
+                fprintf('Freqmode missmatch, Q: %d, LOG: %d\n', Q.FREQMODE, ...
+                    LOG.Data.FreqMode);
+                continue;
+            end
+
+            L1B = get_scan_l1b_data(LOG.URLS.URL_spectra);
+            disp('Loaded L1B data');
+            [L2, L2I, L2C] = q2_inv(LOG, L1B, Q);
+
+            fprintf(strjoin(L2C, newline) + "\n");
+            data = struct('L2', L2, 'L2I', L2I, 'L2C', strjoin(L2C, newline));
+            webwrite_retry(project, data);
+            job.ack();
+        catch err2
+            job.nack(60);
+            fprintf('Error processing job: %s\n', err2.message);
+        end
+
+        fclose('all');
     end
-    
-    fclose('all');
-    exit(0);
+
 end

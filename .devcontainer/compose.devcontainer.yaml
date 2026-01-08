@@ -1,0 +1,26 @@
+services:
+  # Build your existing complex image once, tag it, then use it as base for dev.
+  dev:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        FM: "2"
+        INVMODE: "stnd"
+    volumes:
+      - ..:/workspaces/qsmr-system:cached
+    working_dir: /qsmr-system
+
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,sqs
+      AWS_DEFAULT_REGION: eu-north-1
+      RESULT_BUCKET: my-results-bucket
+      TASK_QUEUE_NAME: tasks
+    volumes:
+      - ./localstack-init:/etc/localstack/init/ready.d
+

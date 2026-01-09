@@ -1,13 +1,17 @@
-#!/bin/env python3
+from __future__ import annotations
 
-import os
 import json
 import logging
+import os
 import sys
+from typing import TYPE_CHECKING
+
 from boto3 import client
-from mypy_boto3_sqs import SQSClient
 from pydantic import BaseModel
-from mypy_boto3_sqs.type_defs import MessageTypeDef
+
+if TYPE_CHECKING:  # Only needed for static type checkers, not at runtime
+    from mypy_boto3_sqs import SQSClient
+    from mypy_boto3_sqs.type_defs import MessageTypeDef
 
 QSMR_BINARY = "/qsmr/run_qsmr.sh"
 MATLAB_ROOT = "/opt/MATLAB/R2024b"
@@ -28,7 +32,7 @@ class QSMRTask(BaseModel):
 
 
 class Task:
-    def __init__(self, sqs_client: SQSClient, queue_url:str, msg: MessageTypeDef):
+    def __init__(self, sqs_client: SQSClient, queue_url: str, msg: MessageTypeDef):
         self._client = sqs_client
         self._queue_url = queue_url
         self._receipt = msg["ReceiptHandle"]  # type: ignore
@@ -56,6 +60,7 @@ class Task:
                 ReceiptHandle=self._receipt,
                 VisibilityTimeout=int(delay_seconds),
             )
+
 
 def yield_queue_messages(queue_name=None):
     """

@@ -2,12 +2,6 @@ version = 1
 revision = 3
 requires-python = ">=3.12"
 
-[manifest]
-members = [
-    "odin-api-client",
-    "qsmr-system",
-]
-
 [[package]]
 name = "annotated-types"
 version = "0.7.0"
@@ -749,23 +743,6 @@ wheels = [
 ]
 
 [[package]]
-name = "odin-api-client"
-version = "5"
-source = { editable = "api/odin-api-client" }
-dependencies = [
-    { name = "attrs" },
-    { name = "httpx" },
-    { name = "python-dateutil" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "attrs", specifier = ">=22.2.0" },
-    { name = "httpx", specifier = ">=0.23.0,<0.29.0" },
-    { name = "python-dateutil", specifier = ">=2.8.0,<3" },
-]
-
-[[package]]
 name = "openapi-python-client"
 version = "0.28.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1271,7 +1248,7 @@ wheels = [
 [[package]]
 name = "qsmr-system"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "boto3" },
     { name = "pandas" },

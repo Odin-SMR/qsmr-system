@@ -5,7 +5,10 @@
 
 function [] = qsmr()
     % Main loop: uses Python generator to get queue messages as JSON and process them
-    ensurePythonVenv();
+    pyenv( ...
+        "Version", "/venv/bin/python", ...
+        "ExecutionMode", "OutOfProcess" ...
+    );
     fprintf(string(py.sys.version) + "\n");
     fprintf(string(py.sys.executable) + "\n");
 

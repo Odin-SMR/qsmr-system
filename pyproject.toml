@@ -13,9 +13,9 @@ dependencies = [
     "pyhumps>=3.8.0",
 ]
 
-# [build-system]
-# requires = ["uv-build>=0.1.0"]
-# build-backend = "uv_build"
+[build-system]
+requires = ["uv-build>=0.1.0"]
+build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
@@ -29,12 +29,5 @@ dev = [
     "ruff>=0.14.10",
 ]
 
-[tool.uv.workspace]
-members = [
-    "api/odin-api-client",
-]
-
 [pytest]
-markers = [
-    "system",
-]
+markers = ["system"]

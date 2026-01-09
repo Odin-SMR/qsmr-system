@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from datetime import datetime, timezone
 
@@ -127,7 +129,9 @@ def l2i_dataframe(batch: list[Level2i]) -> DataFrame:
             records.append(rec)
 
     df = pd.DataFrame(records)
-    df['scan_id_prefix'] = np.vectorize(lambda x: f"{x >> (6*4):03x}")(df.scan_id.to_numpy())
+    df["scan_id_prefix"] = np.vectorize(lambda x: f"{x >> (6*4):03x}")(
+        df.scan_id.to_numpy()
+    )
     return df.set_index("scan_id").sort_index()
 
 

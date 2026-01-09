@@ -65,8 +65,7 @@ WORKDIR /venv
 COPY dist/qsmr_system-0.1.0-py3-none-any.whl /qsmrsystem/
 RUN /usr/local/bin/uv pip install /qsmrsystem/qsmr_system-0.1.0-py3-none-any.whl
 
-WORKDIR /qsmr
-ENTRYPOINT [ "./run_qsmr.sh", "/opt/MATLAB/R2024b/" ]
+ENTRYPOINT [ "uv", "run", "/qsmr/run_qsmr.sh", "/opt/MATLAB/R2024b/" ]
 CMD []
 
 # .devcontainer/Dockerfile

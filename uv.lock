@@ -1251,6 +1251,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
+    { name = "httpx" },
     { name = "pandas" },
     { name = "pyarrow" },
     { name = "pydantic" },
@@ -1273,6 +1274,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.42.17" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "pyarrow", specifier = ">=22.0.0" },
     { name = "pydantic", specifier = ">=2.12.5" },

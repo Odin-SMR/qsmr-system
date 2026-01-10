@@ -145,10 +145,10 @@ def save_parquet(input: str, project: str = "dummy") -> None:
         partition_cols=["project", "freq_mode", "product", "year", "month"],
         index=True,
     )
-    dfi = l2i_dataframe([parsed_data.L2I])
-    dfi["project"] = project
-    dfi.to_parquet(
-        "s3://odin-level2-batch/l2i/",
-        partition_cols=["project", "freq_mode", "scan_id_prefix"],
-        index=True,
-    )
+    # dfi = l2i_dataframe(parsed_data.L2I)
+    # dfi["project"] = project
+    # dfi.to_parquet(
+    #     "s3://odin-level2-batch/l2i/",
+    #     partition_cols=["project", "freq_mode", "scan_id_prefix"],
+    #     index=True,
+    # )

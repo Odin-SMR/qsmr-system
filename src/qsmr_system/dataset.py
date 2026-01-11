@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from os import environ
 
 import pandas as pd
 from pandas import DataFrame
@@ -51,7 +52,7 @@ class Level2i(BaseModel):
 
 class Result(BaseModel):
     L2: Level2 | list[Level2]
-    L2I: Level2i
+    L2I: Level2i | list[Level2i]
     L2C: str
 
 
@@ -99,34 +100,50 @@ def l2_dataframe(batch: Level2 | list[Level2]) -> DataFrame:
     return df.set_index("time").sort_index()
 
 
-def l2i_dataframe(batch: Level2i, mjd: float) -> DataFrame:
+def l2i_dataframe(batch: Level2i | list[Level2i], mjd: float) -> DataFrame:
     records = []
-    n = len(batch.STW)
-    for i in range(n):
-        rec = {
-            "bline_offset": [b[i] for b in batch.BlineOffset],
-            "channels_id": batch.ChannelsID[i],
-            "fit_spectrum": batch.FitSpectrum[i],
-            "freq_mode": batch.FreqMode,
-            "freq_offset": (
-                batch.FreqOffset[i]
-                if isinstance(batch.FreqOffset, list)
-                else batch.FreqOffset
-            ),
-            "inv_mode": batch.InvMode,
-            "lo_freq": batch.LOFreq[i],
-            "min_lm_factor": batch.MinLmFactor,
-            "point_offset": batch.PointOffset,
-            "residual": batch.Residual,
-            "sb_path": batch.SBpath,
-            "stw": batch.STW[i],
-            "scan_id": batch.ScanID,
-            "tsat": batch.Tsat,
-        }
-        records.append(rec)
+    if isinstance(batch, Level2i):
+        n = len(batch.STW)
+        for i in range(n):
+            rec = {
+                "bline_offset": [b[i] for b in batch.BlineOffset],
+                "channels_id": batch.ChannelsID[i],
+                "fit_spectrum": batch.FitSpectrum[i],
+                "freq_mode": batch.FreqMode,
+                "freq_offset": (
+                    batch.FreqOffset[i]
+                    if isinstance(batch.FreqOffset, list)
+                    else batch.FreqOffset
+                ),
+                "inv_mode": batch.InvMode,
+                "lo_freq": batch.LOFreq[i],
+                "min_lm_factor": batch.MinLmFactor,
+                "point_offset": batch.PointOffset,
+                "residual": batch.Residual,
+                "sb_path": batch.SBpath,
+                "stw": batch.STW[i],
+                "scan_id": batch.ScanID,
+                "tsat": batch.Tsat,
+            }
+            records.append(rec)
     if len(records) == 0:
         return pd.DataFrame()
     df = pd.DataFrame(records)
+    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="d")
+    df["year"] = df.time.dt.year.astype(str).str.zfill(4)
+    df["month"] = df.time.dt.month.astype(str).str.zfill(2)
+    return df.set_index("time").sort_index()
+
+
+def l2c_dataframe(
+    batch: str, mjd: float, freqmode: int, processed: pd.Timestamp, project: str
+) -> DataFrame:
+    records = batch.splitlines()
+
+    df = pd.DataFrame(records, columns=["message"])
+    df["freq_mode"] = freqmode
+    df["processed"] = processed
+    df["project"] = project
     df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="d")
     df["year"] = df.time.dt.year.astype(str).str.zfill(4)
     df["month"] = df.time.dt.month.astype(str).str.zfill(2)
@@ -141,6 +158,7 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
     data = json.loads(input_data)
 
     parsed_data = Result.model_validate(data)
+    print("l2")
     df = l2_dataframe(parsed_data.L2)
     if not df.empty:
         df["project"] = project
@@ -150,14 +168,23 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
             partition_cols=["project", "freq_mode", "product", "year", "month"],
             index=True,
         )
-        mjd = df["MJD"].iloc[0]
+        mjd = df["mjd"].iloc[0]
+        print("l2i")
         dfi = l2i_dataframe(parsed_data.L2I, mjd)
         if not dfi.empty:
             dfi["project"] = project
-            dfi["errors"] = parsed_data.L2C
             dfi["processed"] = processed
             dfi.to_parquet(
                 "s3://odin-level2-batch/l2i/",
                 partition_cols=["project", "freq_mode", "year", "month"],
                 index=True,
             )
+    print("l2c")
+    dfc = l2c_dataframe(
+        parsed_data.L2C, mjd, int(environ.get("FM", 0)), processed, project
+    )
+    dfc.to_parquet(
+        "s3://odin-level2-batch/l2c/",
+        partition_cols=["project", "freq_mode", "year", "month"],
+        index=True,
+    )

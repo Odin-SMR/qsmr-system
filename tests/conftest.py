@@ -19,5 +19,5 @@ def fm14_ok_data() -> Result:
 
 @pytest.fixture
 def fm14_empty_data() -> Result:
-    data = (Path(__file__).parent / "FM14_14724113814_empty.json").read_text()
+    data = (Path(__file__).parent / "FM14_15015507029_empty.json").read_text()
     return Result.model_validate_json(data)

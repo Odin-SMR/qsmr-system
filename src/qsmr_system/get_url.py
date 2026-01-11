@@ -11,11 +11,7 @@ def enforce_https(url: str) -> str:
     parsed = urlparse(url)
 
     # No scheme → assume https
-    if not parsed.scheme:
-        parsed = parsed._replace(scheme="https")
-
-    # Explicit http → upgrade to https
-    elif parsed.scheme == "http":
+    if not parsed.scheme or parsed.scheme == "http":
         parsed = parsed._replace(scheme="https")
 
     return urlunparse(parsed)
@@ -64,9 +60,11 @@ def get_json_with_retry(
                 httpx.HTTPStatusError,
             ) as exc:
                 # Only retry on 5xx if it's an HTTP error
-                if isinstance(exc, httpx.HTTPStatusError):
-                    if exc.response.status_code < 500:
-                        raise  # 4xx → caller error, do not retry
+                if (
+                    isinstance(exc, httpx.HTTPStatusError)
+                    and exc.response.status_code < 500
+                ):
+                    raise  # 4xx → caller error, do not retry
 
                 if attempt == max_attempts:
                     raise RuntimeError(f"Failed after {max_attempts} attempts") from exc

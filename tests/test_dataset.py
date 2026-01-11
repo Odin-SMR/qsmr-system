@@ -1,4 +1,4 @@
-from qsmr_system.dataset import l2_dataframe, l2i_dataframe, Result
+from qsmr_system.dataset import Result, l2_dataframe, l2i_dataframe
 
 
 def test_l2_dataframe(sample_data: Result) -> None:

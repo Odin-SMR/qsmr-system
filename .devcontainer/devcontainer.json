@@ -11,15 +11,16 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
+        "ms-python.vscode-pylance",
         "ms-azuretools.vscode-docker",
         "GitHub.copilot",
         "github.copilot-chat",
         "ms-python.debugpy",
         "redhat.vscode-yaml",
-        "ms-python.black-formatter",
-        "ms-python.mypy-type-checker",
+        "astral-sh.ty",
         "github.vscode-pull-request-github",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "yzhang.markdown-all-in-one"
       ]
     }
   },
@@ -31,9 +32,6 @@
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {},
-    // "ghcr.io/devcontainers-extra/features/apt-get-packages:1": {
-    //   "packages": "libgtk-3-bin,libatk-bridge2.0-0,libgbm1,libxss1,libnss3,libasound2t64"
-    // }
   },
   "remoteEnv": {
     "AWS_ACCESS_KEY_ID": "test",

@@ -25,6 +25,23 @@ git submodule update --recursive
 ./deploy.sh
 ```
 
+## Testing the python code
+tooling used to test the build locally before deploying to AWS.
+ - ruff
+ - ty
+ - pytest
+ - pre-commit
+
+### Installing pre-commit hooks
+```
+pre-commit install
+```
+
+### Running tests
+```
+pre-commit run --all-files --hooks-stage manual
+```
+
 ## devcontainer local execution instructions
 To test the build locally in a devcontainer, open the folder in VSCode and select "Reopen in container".
 

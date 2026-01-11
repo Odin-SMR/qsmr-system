@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-import numpy as np
 import pandas as pd
 from pandas import DataFrame
 from pydantic import BaseModel
 
-start_mjd_epoch = datetime(1858, 11, 17, 0, 0, 0, 0, tzinfo=timezone.utc)
+start_mjd_epoch = datetime(1858, 11, 17, 0, 0, 0, 0, tzinfo=UTC)
 
 
 class Level2(BaseModel):
@@ -93,8 +92,8 @@ def l2_dataframe(batch: list[Level2]) -> DataFrame:
     df = pd.DataFrame(records)
     df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(df["mjd"], unit="d")
     df["quality"] = df["quality"].astype("Int64")
-    df["year"] = df.time.dt.year.astype(str).str.zfill(4)  # type: ignore
-    df["month"] = df.time.dt.month.astype(str).str.zfill(2)  # type: ignore
+    df["year"] = df.time.dt.year.astype(str).str.zfill(4)
+    df["month"] = df.time.dt.month.astype(str).str.zfill(2)
     return df.set_index("time").sort_index()
 
 
@@ -127,14 +126,13 @@ def l2i_dataframe(batch: Level2i, mjd: float) -> DataFrame:
         return pd.DataFrame()
     df = pd.DataFrame(records)
     df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="d")
-    df["year"] = df.time.dt.year.astype(str).str.zfill(4)  # type: ignore
-    df["month"] = df.time.dt.month.astype(str).str.zfill(2)  # type: ignore
+    df["year"] = df.time.dt.year.astype(str).str.zfill(4)
+    df["month"] = df.time.dt.month.astype(str).str.zfill(2)
     return df.set_index("time").sort_index()
 
 
-
 def save_parquet(input: str, project: str = "dummy") -> None:
-    processed = pd.Timestamp.now(tz=timezone.utc)
+    processed = pd.Timestamp.now(tz=UTC)
     print("Saving parquet for project:", project)
     with open("debug.json", "w") as f:
         f.write(input)

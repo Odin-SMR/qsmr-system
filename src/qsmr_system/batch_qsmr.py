@@ -35,9 +35,9 @@ class Task:
     def __init__(self, sqs_client: SQSClient, queue_url: str, msg: MessageTypeDef):
         self._client = sqs_client
         self._queue_url = queue_url
-        self._receipt = msg["ReceiptHandle"]  # type: ignore
-        self._received = msg["Attributes"]["ApproximateReceiveCount"]  # type: ignore
-        self.task = QSMRTask.model_validate(json.loads(msg["Body"]))  # type: ignore
+        self._receipt = msg["ReceiptHandle"]
+        self._received = msg["Attributes"]["ApproximateReceiveCount"]
+        self.task = QSMRTask.model_validate(json.loads(msg["Body"]))
 
     def ack(self):
         print(f"Acknowledging message for task: {self.task.source}")
@@ -50,7 +50,8 @@ class Task:
         print(f"Negatively acknowledging message for task: {self.task.source}")
         if self._received and int(self._received) >= 5:
             logger.error(
-                f"Message {self.task.source} has failed processing {self._received} times. Dropping."
+                f"Message {self.task.source} has failed processing {self._received}"
+                " times. Dropping."
             )
             self.ack()
             return
@@ -64,8 +65,8 @@ class Task:
 
 def yield_queue_messages(queue_name=None):
     """
-    Generator that yields messages from the SQS queue one at a time, blocking if none are available.
-    Intended for use by MATLAB's Python integration.
+    Generator that yields messages from the SQS queue one at a time, blocking if none
+    are available. Intended for use by MATLAB's Python integration.
     """
     import time
 

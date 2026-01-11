@@ -1,0 +1,5 @@
+{
+    "L2": [],
+    "L2I": [],
+    "L2C": "Status: 17 spectra left after altitude cropping\nFilter: 17 spectra removed due to Scanning flag\nFilter: 1 spectra removed due to Tint flag\nFilter: 2 spectra removed due to Ref1 flag\nStatus: 0 spectra left after quality filtering\nStatus: 0 AC sub-modules left after quality filtering\nError: Too few frequencies left in spectra (0 vs. 200)\nError: Too few spectra left in scan (0 vs. 8)"
+}

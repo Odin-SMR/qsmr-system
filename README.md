@@ -39,7 +39,7 @@ pre-commit install
 
 ### Running tests
 ```
-pre-commit run --all-files --hooks-stage manual
+pre-commit run --all-files --hook-stage manual
 ```
 
 ## devcontainer local execution instructions
@@ -52,8 +52,7 @@ uv run /qsmr/run_qsmr.sh /opt/MATLAB/R2024b/
 
 add a task to the queue:
 ```
-aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://
-odin-smr.org/rest_api/v5/level1/2/14205733121/Log/", "target":"projectx"}'
+aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://odin-smr.org/rest_api/v5/level1/2/14205733121/Log/", "target":"projectx"}'
 ```
 results will be in found:
 ```

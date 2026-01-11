@@ -50,18 +50,20 @@ class Level2i(BaseModel):
 
 
 class Result(BaseModel):
-    L2: list[Level2]
+    L2: Level2 | list[Level2]
     L2I: Level2i
     L2C: str
 
 
-def l2_dataframe(batch: list[Level2]) -> DataFrame:
+def l2_dataframe(batch: Level2 | list[Level2]) -> DataFrame:
     # Assume all lists in Level2 have the same length
     if not batch:
         return pd.DataFrame()
 
     # Get the first Level2 object to determine the length
     records = []
+    if isinstance(batch, Level2):
+        batch = [batch]
     for p in batch:
         n = len(p.AVK)
         for i in range(n):
@@ -135,7 +137,7 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
     processed = pd.Timestamp.now(tz=UTC)
     print("Saving parquet for project:", project)
     # with open("debug.json", "w") as f:
-    #     f.write(input)
+    #     f.write(input_data)
     data = json.loads(input_data)
 
     parsed_data = Result.model_validate(data)
@@ -148,7 +150,8 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
             partition_cols=["project", "freq_mode", "product", "year", "month"],
             index=True,
         )
-        dfi = l2i_dataframe(parsed_data.L2I, parsed_data.L2[0].MJD)
+        mjd = df["MJD"].iloc[0]
+        dfi = l2i_dataframe(parsed_data.L2I, mjd)
         if not dfi.empty:
             dfi["project"] = project
             dfi["errors"] = parsed_data.L2C

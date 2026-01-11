@@ -50,7 +50,7 @@ function [] = qsmr()
 
             if Q.FREQMODE ~= LOG.FreqMode
                 fprintf('Freqmode missmatch, Q: %d, LOG: %d\n', Q.FREQMODE, ...
-                    LOG.Data.FreqMode);
+                    LOG.FreqMode);
                 continue;
             end
 

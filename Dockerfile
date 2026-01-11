@@ -84,9 +84,6 @@ RUN  echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 440 /etc/sudoers.d/$USERNAME
 
 USER ${USERNAME}
-
-# Switch user *only now*
-USER ${USERNAME}
 WORKDIR /workspaces/qsmr-system
 ENTRYPOINT []
 CMD [ "sleep", "infinity" ]

@@ -131,12 +131,12 @@ def l2i_dataframe(batch: Level2i, mjd: float) -> DataFrame:
     return df.set_index("time").sort_index()
 
 
-def save_parquet(input: str, project: str = "dummy") -> None:
+def save_parquet(input_data: str, project: str = "dummy") -> None:
     processed = pd.Timestamp.now(tz=UTC)
     print("Saving parquet for project:", project)
-    with open("debug.json", "w") as f:
-        f.write(input)
-    data = json.loads(input)
+    # with open("debug.json", "w") as f:
+    #     f.write(input)
+    data = json.loads(input_data)
 
     parsed_data = Result.model_validate(data)
     df = l2_dataframe(parsed_data.L2)

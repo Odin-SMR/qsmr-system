@@ -24,7 +24,7 @@ def get_json_with_retry(
     initial_delay: float = 1.0,
     max_delay: float = 120.0,
     timeout: float = 30.0,
-) -> str:
+) -> str | None:
     """
     Fetch JSON from an endpoint with retries and exponential backoff.
 
@@ -71,8 +71,6 @@ def get_json_with_retry(
 
                 time.sleep(delay)
                 delay = min(delay * 2, max_delay)
-
-    raise RuntimeError("Unreachable")
 
 
 if __name__ == "__main__":

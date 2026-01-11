@@ -44,9 +44,10 @@ aws --endpoint-url="http://localstack:4566" s3 ls odin-level2-batch/ --recursive
 ```
 
 ```
-2026-01-10 13:04:39      13155 l2/project=projectx/freq_mode=2/product=H2O-545GHz-15to30km/year=2023/month=09/dfae3efc4020407088e8f77645f7d149-0.parquet
-2026-01-10 13:04:39      14951 l2/project=projectx/freq_mode=2/product=HNO3-545GHz-20to50km/year=2023/month=09/dfae3efc4020407088e8f77645f7d149-0.parquet
-2026-01-10 13:04:39      41028 l2/project=projectx/freq_mode=2/product=O3-545GHz-20to85km/year=2023/month=09/dfae3efc4020407088e8f77645f7d149-0.parquet
-2026-01-10 13:04:39      14983 l2/project=projectx/freq_mode=2/product=O3-668-545GHz-25to45km/year=2023/month=09/dfae3efc4020407088e8f77645f7d149-0.parquet
-2026-01-10 13:04:39      35580 l2/project=projectx/freq_mode=2/product=Temperature-545GHz-15to65km/year=2023/month=09/dfae3efc4020407088e8f77645f7d149-0.parquet
+2026-01-10 13:04:39      13155 l2/project=projectx/freq_mode=2/2026-01-10 13:48:33      13155 l2/project=projectx/freq_mode=2/product=H2O-545GHz-15to30km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
+2026-01-10 13:48:33      14951 l2/project=projectx/freq_mode=2/product=HNO3-545GHz-20to50km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
+2026-01-10 13:48:33      41028 l2/project=projectx/freq_mode=2/product=O3-545GHz-20to85km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
+2026-01-10 13:48:33      14983 l2/project=projectx/freq_mode=2/product=O3-668-545GHz-25to45km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
+2026-01-10 13:48:33      35580 l2/project=projectx/freq_mode=2/product=Temperature-545GHz-15to65km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
+2026-01-10 13:48:33      32443 l2i/project=projectx/freq_mode=2/scan_id_prefix=34e/2bd883de23b04101aa6686a20ef16184-0.parquet
 ```

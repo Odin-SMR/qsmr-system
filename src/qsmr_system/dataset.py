@@ -98,57 +98,65 @@ def l2_dataframe(batch: list[Level2]) -> DataFrame:
     return df.set_index("time").sort_index()
 
 
-def l2i_dataframe(batch: list[Level2i]) -> DataFrame:
-    # Assume all lists in Level2 have the same length
-    if not batch:
-        return pd.DataFrame()
-
-    # Get the first Level2 object to determine the length
+def l2i_dataframe(batch: Level2i, mjd: float) -> DataFrame:
     records = []
-    for p in batch:
-        n = len(p.BlineOffset)
-        for i in range(n):
-            rec = {
-                "bline_offset": p.BlineOffset[i],
-                "channels_id": p.ChannelsID[i],
-                "fit_spectrum": p.FitSpectrum[i],
-                "freq_mode": p.FreqMode,
-                "freq_offset": (
-                    p.FreqOffset[i] if isinstance(p.FreqOffset, list) else p.FreqOffset
-                ),
-                "inv_mode": p.InvMode,
-                "lo_freq": p.LOFreq[i],
-                "min_lm_factor": p.MinLmFactor,
-                "point_offset": p.PointOffset,
-                "residual": p.Residual,
-                "sb_path": p.SBpath,
-                "stw": p.STW[i],
-                "scan_id": p.ScanID,
-                "tsat": p.Tsat,
-            }
-            records.append(rec)
-
+    n = len(batch.STW)
+    for i in range(n):
+        rec = {
+            "bline_offset": [b[i] for b in batch.BlineOffset],
+            "channels_id": batch.ChannelsID[i],
+            "fit_spectrum": batch.FitSpectrum[i],
+            "freq_mode": batch.FreqMode,
+            "freq_offset": (
+                batch.FreqOffset[i]
+                if isinstance(batch.FreqOffset, list)
+                else batch.FreqOffset
+            ),
+            "inv_mode": batch.InvMode,
+            "lo_freq": batch.LOFreq[i],
+            "min_lm_factor": batch.MinLmFactor,
+            "point_offset": batch.PointOffset,
+            "residual": batch.Residual,
+            "sb_path": batch.SBpath,
+            "stw": batch.STW[i],
+            "scan_id": batch.ScanID,
+            "tsat": batch.Tsat,
+        }
+        records.append(rec)
+    if len(records) == 0:
+        return pd.DataFrame()
     df = pd.DataFrame(records)
-    df["scan_id_prefix"] = np.vectorize(lambda x: f"{x >> (6*4):03x}")(
-        df.scan_id.to_numpy()
-    )
-    return df.set_index("scan_id").sort_index()
+    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="d")
+    df["year"] = df.time.dt.year.astype(str).str.zfill(4)  # type: ignore
+    df["month"] = df.time.dt.month.astype(str).str.zfill(2)  # type: ignore
+    return df.set_index("time").sort_index()
+
 
 
 def save_parquet(input: str, project: str = "dummy") -> None:
+    processed = pd.Timestamp.now(tz=timezone.utc)
+    print("Saving parquet for project:", project)
+    with open("debug.json", "w") as f:
+        f.write(input)
     data = json.loads(input)
+
     parsed_data = Result.model_validate(data)
     df = l2_dataframe(parsed_data.L2)
-    df["project"] = project
-    df.to_parquet(
-        "s3://odin-level2-batch/l2/",
-        partition_cols=["project", "freq_mode", "product", "year", "month"],
-        index=True,
-    )
-    # dfi = l2i_dataframe(parsed_data.L2I)
-    # dfi["project"] = project
-    # dfi.to_parquet(
-    #     "s3://odin-level2-batch/l2i/",
-    #     partition_cols=["project", "freq_mode", "scan_id_prefix"],
-    #     index=True,
-    # )
+    if not df.empty:
+        df["project"] = project
+        df["processed"] = processed
+        df.to_parquet(
+            "s3://odin-level2-batch/l2/",
+            partition_cols=["project", "freq_mode", "product", "year", "month"],
+            index=True,
+        )
+        dfi = l2i_dataframe(parsed_data.L2I, parsed_data.L2[0].MJD)
+        if not dfi.empty:
+            dfi["project"] = project
+            dfi["errors"] = parsed_data.L2C
+            dfi["processed"] = processed
+            dfi.to_parquet(
+                "s3://odin-level2-batch/l2i/",
+                partition_cols=["project", "freq_mode", "year", "month"],
+                index=True,
+            )

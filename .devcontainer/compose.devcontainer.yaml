@@ -19,7 +19,7 @@ services:
     environment:
       SERVICES: s3,sqs
       AWS_DEFAULT_REGION: eu-north-1
-      RESULT_BUCKET: my-results-bucket
+      RESULT_BUCKET: s3://odin-level2-batch
       TASK_QUEUE_NAME: tasks
     volumes:
       - ./localstack-init:/etc/localstack/init/ready.d

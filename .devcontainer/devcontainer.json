@@ -38,7 +38,6 @@
   "remoteEnv": {
     "AWS_ACCESS_KEY_ID": "test",
     "AWS_SECRET_ACCESS_KEY": "test",
-    "TEST_QUEUE": "tasks",
     "QUEUE_NAME": "tasks",
     "AWS_ENDPOINT_URL": "http://localstack:4566",
     "AWS_REGION": "eu-north-1"

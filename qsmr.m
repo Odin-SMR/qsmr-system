@@ -5,8 +5,14 @@
 
 function [] = qsmr()
     % Main loop: uses Python generator to get queue messages as JSON and process them
+    [status, pyExe] = system("which python");
+    if status ~= 0
+        error("Python not found in PATH");
+    end
+
+    pyExe = strtrim(pyExe);
     pyenv( ...
-        "Version", "/venv/bin/python", ...
+        "Version", pyExe, ...
         "ExecutionMode", "OutOfProcess" ...
     );
     fprintf(string(py.sys.version) + "\n");

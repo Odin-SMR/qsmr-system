@@ -26,4 +26,7 @@ precalcstandaloneApplication
 qsmrInstaller
 qsmrstandaloneApplication
 dist
+.venv
+.mypy_cache
+.ruff_cache
 

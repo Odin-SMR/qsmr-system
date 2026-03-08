@@ -1,13 +1,20 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import UTC, datetime
-from os import environ
 
 import pandas as pd
+from aws_lambda_powertools import Logger, Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 from pandas import DataFrame
 from pydantic import BaseModel
 
+QUEUE_ENV = "QUEUE_NAME"
+QUEUE = os.environ.get(QUEUE_ENV, "Unknown")
+
+logger = Logger(service="QSMR")
+metrics = Metrics(namespace="QSMR", service=QUEUE)
 start_mjd_epoch = datetime(1858, 11, 17, 0, 0, 0, 0, tzinfo=UTC)
 
 
@@ -93,7 +100,7 @@ def l2_dataframe(batch: Level2 | list[Level2]) -> DataFrame:
             records.append(rec)
 
     df = pd.DataFrame(records)
-    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(df["mjd"], unit="d")
+    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(df["mjd"], unit="D")
     df["quality"] = df["quality"].astype("Int64")
     df["year"] = df.time.dt.year.astype(str).str.zfill(4)
     df["month"] = df.time.dt.month.astype(str).str.zfill(2)
@@ -129,7 +136,7 @@ def l2i_dataframe(batch: Level2i | list[Level2i], mjd: float) -> DataFrame:
     if len(records) == 0:
         return pd.DataFrame()
     df = pd.DataFrame(records)
-    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="d")
+    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="D")
     df["year"] = df.time.dt.year.astype(str).str.zfill(4)
     df["month"] = df.time.dt.month.astype(str).str.zfill(2)
     return df.set_index("time").sort_index()
@@ -144,7 +151,7 @@ def l2c_dataframe(
     df["freq_mode"] = freqmode
     df["processed"] = processed
     df["project"] = project
-    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="d")
+    df["time"] = pd.to_datetime(start_mjd_epoch) + pd.to_timedelta(mjd, unit="D")
     df["year"] = df.time.dt.year.astype(str).str.zfill(4)
     df["month"] = df.time.dt.month.astype(str).str.zfill(2)
     return df.set_index("time").sort_index()
@@ -152,13 +159,10 @@ def l2c_dataframe(
 
 def save_parquet(input_data: str, project: str = "dummy") -> None:
     processed = pd.Timestamp.now(tz=UTC)
-    print("Saving parquet for project:", project)
-    # with open("debug.json", "w") as f:
-    #     f.write(input_data)
     data = json.loads(input_data)
 
     parsed_data = Result.model_validate(data)
-    print("l2")
+    logger.info("Saving L2")
     df = l2_dataframe(parsed_data.L2)
     if not df.empty:
         df["project"] = project
@@ -168,8 +172,9 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
             partition_cols=["project", "freq_mode", "product", "year", "month"],
             index=True,
         )
+        metrics.add_metric(name="L2Records", unit=MetricUnit.Count, value=len(df))
         mjd = df["mjd"].iloc[0]
-        print("l2i")
+        logger.info("Saving L2i")
         dfi = l2i_dataframe(parsed_data.L2I, mjd)
         if not dfi.empty:
             dfi["project"] = project
@@ -179,12 +184,25 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
                 partition_cols=["project", "freq_mode", "year", "month"],
                 index=True,
             )
-    print("l2c")
-    dfc = l2c_dataframe(
-        parsed_data.L2C, mjd, int(environ.get("FM", 0)), processed, project
-    )
-    dfc.to_parquet(
-        "s3://odin-level2-batch/l2c/",
-        partition_cols=["project", "freq_mode", "year", "month"],
-        index=True,
-    )
+            metrics.add_metric(name="L2IRecords", unit=MetricUnit.Count, value=len(dfi))
+    else:
+        logger.warning("No L2 data to save")
+        metrics.add_metric(name="L2Records", unit=MetricUnit.Count, value=0)
+        metrics.add_metric(name="L2IRecords", unit=MetricUnit.Count, value=0)
+    # dfc = l2c_dataframe(
+    #     parsed_data.L2C, mjd, int(environ.get("FM", 0)), processed, project
+    # )
+    # dfc.to_parquet(
+    #     "s3://odin-level2-batch/l2c/",
+    #     partition_cols=["project", "freq_mode", "year", "month"],
+    #     index=True,
+    # )
+
+
+# l2
+# l2c:  Status: 25 spectra left after altitude cropping
+# Filter: 4 spectra removed due to Ref1 flag
+# Status: 21 spectra left after quality filtering
+# Status: 6 AC sub-modules left after quality filtering
+# Status: 419 channels left after frequency cropping
+# Error: Input coordinates must be real.

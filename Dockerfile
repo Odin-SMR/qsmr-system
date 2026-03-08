@@ -62,8 +62,8 @@ COPY qsmrstandaloneApplication /qsmr
 
 RUN uv venv --python 3.12 /venv
 WORKDIR /venv
-COPY dist/qsmr_system-0.1.0-py3-none-any.whl /qsmrsystem/
-RUN /usr/local/bin/uv pip install /qsmrsystem/qsmr_system-0.1.0-py3-none-any.whl
+COPY dist/qsmr_system-1.0.0-py3-none-any.whl /qsmrsystem/
+RUN /usr/local/bin/uv pip install /qsmrsystem/qsmr_system-1.0.0-py3-none-any.whl
 
 ENTRYPOINT [ "uv", "run", "/qsmr/run_qsmr.sh", "/opt/MATLAB/R2024b/" ]
 CMD []

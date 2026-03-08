@@ -17,7 +17,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      SERVICES: s3,sqs
+      SERVICES: s3,sqs,cloudwatch
       AWS_DEFAULT_REGION: eu-north-1
       RESULT_BUCKET: s3://odin-level2-batch
       TASK_QUEUE_NAME: tasks

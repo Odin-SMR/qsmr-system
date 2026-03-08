@@ -45,12 +45,16 @@ function [] = qsmr()
 
             if isempty(LOG)
                 fprintf('Empty results from URL-input: %s\n', source_url);
+                % Drop task: no data available at source URL
+                job.ack("empty_log");
                 continue;
             end
 
             if Q.FREQMODE ~= LOG.FreqMode
                 fprintf('Freqmode missmatch, Q: %d, LOG: %d\n', Q.FREQMODE, ...
                     LOG.FreqMode);
+                % Drop task: configuration and input freqmodes do not match
+                job.ack("freqmode_mismatch");
                 continue;
             end
 
@@ -61,9 +65,11 @@ function [] = qsmr()
             fprintf(strjoin(L2C, newline) + "\n");
             data = struct('L2', L2, 'L2I', L2I, 'L2C', strjoin(L2C, newline));
             webwrite_retry(project, data);
-            job.ack();
+            % Successful processing and delivery
+            job.ack("success");
         catch err2
-            job.nack(60);
+            % Processing error: let Python side handle retry/drop logic
+            job.nack(60, "processing_error");
             fprintf('Error processing job: %s\n', err2.message);
         end
 

@@ -22,4 +22,4 @@ xmlFiles = "./qsmr/Mscripts_atmlab/xml/" + [string({xmlRead.name}), string({xmlW
 % compile precalc
 appFile = "precalc.m";
 results = compiler.build.standaloneApplication(appFile, 'AdditionalFiles', xmlFiles);
-compiler.runtime.customInstaller("precalcInstaller",results);
+compiler.runtime.customInstaller("precalcInstaller", results);

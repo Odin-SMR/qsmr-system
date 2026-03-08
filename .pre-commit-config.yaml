@@ -1,0 +1,28 @@
+repos:
+  # Ruff: lint + auto-fix
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+
+      - id: ruff-format
+
+  # Ty: fast type checker
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty (type check)
+        entry: uv run ty check
+        language: system
+        pass_filenames: false
+
+  # Pytest: manual only
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (manual)
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        stages: [manual]

@@ -15,5 +15,6 @@ xmlFiles = "./qsmr/Mscripts_atmlab/xml/" + [string({xmlRead.name}), string({xmlW
 
 % compile qsmr
 appFile = "qsmr.m";
+
 results = compiler.build.standaloneApplication(appFile, 'AdditionalFiles', xmlFiles);
-compiler.runtime.customInstaller("qsmrInstaller",results);
+compiler.runtime.customInstaller("qsmrInstaller", results);

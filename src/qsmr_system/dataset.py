@@ -186,7 +186,7 @@ def save_parquet(input_data: str, project: str = "dummy") -> None:
             )
             metrics.add_metric(name="L2IRecords", unit=MetricUnit.Count, value=len(dfi))
     else:
-        logger.warning("No L2 data to save")
+        raise ValueError(f"No L2 data to save: {parsed_data.L2C}")
         metrics.add_metric(name="L2Records", unit=MetricUnit.Count, value=0)
         metrics.add_metric(name="L2IRecords", unit=MetricUnit.Count, value=0)
     # dfc = l2c_dataframe(

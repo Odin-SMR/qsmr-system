@@ -21,7 +21,9 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "boto3-stubs[s3,sqs]>=1.42.17",
-    "ipykernel>=7.1.0",
+    "ipykernel<7",
+    "ipympl>=0.10.0",
+    "jupyterlab>=4.5.6",
     "openapi-python-client>=0.28.0",
     "pandas-stubs>=2.3.3.251201",
     "pre-commit>=4.5.1",

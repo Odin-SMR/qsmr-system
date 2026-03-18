@@ -54,7 +54,7 @@ add a task to the queue:
 ```
 aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://odin-smr.org/rest_api/v5/level1/2/14205733121/Log/", "target":"projectx"}'
 ```
-results will be in found:
+results will be found in the S3 bucket:
 ```
 aws --endpoint-url="http://localstack:4566" s3 ls odin-level2-batch/ --recursive | grep parquet
 ```
@@ -66,4 +66,23 @@ aws --endpoint-url="http://localstack:4566" s3 ls odin-level2-batch/ --recursive
 2026-01-10 13:48:33      14983 l2/project=projectx/freq_mode=2/product=O3-668-545GHz-25to45km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
 2026-01-10 13:48:33      35580 l2/project=projectx/freq_mode=2/product=Temperature-545GHz-15to65km/year=2023/month=09/ff73df70936d497cb703b7190a3ce23f-0.parquet
 2026-01-10 13:48:33      32443 l2i/project=projectx/freq_mode=2/scan_id_prefix=34e/2bd883de23b04101aa6686a20ef16184-0.parquet
+```
+
+More test cases:
+Arts error
+```
+aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://odin-smr.org/rest_api/v5/level1/2/13858867319/Log/", "target":"projectx"}'
+```
+Arts error
+```
+aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://odin-smr.org/rest_api/v5/level1/2/14753266563/Log/", "target":"projectx"}'
+```
+
+FM102 
+```
+aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://odin-smr.org/rest_api/v5/level1/102/15035098693/Log/", "target":"projectx"}'
+```
+FM102 ok!
+```
+aws --endpoint-url="http://localstack:4566" sqs send-message --queue-url http://localhost:4566/000000000000/tasks --message-body '{"source":"https://odin-smr.org/rest_api/v5/level1/102/15034821707/Log/", "target":"projectx"}'
 ```

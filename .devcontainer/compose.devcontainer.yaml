@@ -6,18 +6,24 @@ services:
       dockerfile: Dockerfile
       target: dev
       args:
-        FM: "2"
+        FM: "102"
         INVMODE: "stnd"
+        LOCALSTACK_HOST: localstack
+        LOCALSTACK_PORT: 4566
+        AWS_ACCESS_KEY_ID: test
+        AWS_SECRET_ACCESS_KEY: test
+        AWS_DEFAULT_REGION: eu-north-1
+        AWS_ENDPOINT_URL: http://localstack:4566
     volumes:
       - ..:/workspaces/qsmr-system:cached
     working_dir: /qsmr-system
 
   localstack:
     image: localstack/localstack:latest
-    ports:
-      - "4566:4566"
+    # ports:
+    #   - "4566:4566"
     environment:
-      SERVICES: s3,sqs,cloudwatch
+      SERVICES: s3,sqs,cloudwatch,sts
       AWS_DEFAULT_REGION: eu-north-1
       RESULT_BUCKET: s3://odin-level2-batch
       TASK_QUEUE_NAME: tasks

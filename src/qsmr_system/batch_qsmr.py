@@ -37,7 +37,6 @@ class Task:
         self._client = sqs_client
         self._queue_url = queue_url
         self._receipt = msg["ReceiptHandle"]
-        self._received = msg["Attributes"]["ApproximateReceiveCount"]
         self.task = QSMRTask.model_validate(json.loads(msg["Body"]))
         paths = urlparse(self.task.source).path.strip("/").split("/")
         if len(paths) != 6:
@@ -61,15 +60,8 @@ class Task:
         return int((time.perf_counter() - self._yielded_monotonic) * 1000)
 
     def ack(self, reason: str | None = None):
-        """Acknowledge successful handling of the SQS message.
-
-        The optional *reason* is used to improve observability in CloudWatch
-        by tagging why the task completed (e.g. "success", "empty_log",
-        "freqmode_mismatch", "drop_after_retry").
-        """
-
         logger.info(
-            "Ack message",
+            "Ack task",
             extra={
                 "queue": QUEUE,
                 "source": self.task.source,
@@ -78,47 +70,34 @@ class Task:
         )
 
         metrics.add_metric(name="TaskFinished", unit=MetricUnit.Count, value=1)
-        # Reason-specific counters for finer breakdown in CloudWatch
-        if reason:
-            metrics.add_metric(
-                name=f"TaskFinished_{reason}",
-                unit=MetricUnit.Count,
-                value=1,
-            )
         metrics.add_metric(
             name="TaskProcessingTime",
             unit=MetricUnit.Milliseconds,
             value=self.processing_time_ms,
         )
-        metrics.flush_metrics()
         if self._receipt:
             self._client.delete_message(
                 QueueUrl=self._queue_url, ReceiptHandle=self._receipt
             )
+        metrics.flush_metrics()
 
     def nack(self, delay_seconds: int = 900, reason: str | None = None):
         logger.warning(
-            "Nack message",
+            "Nack task",
             extra={
                 "queue": QUEUE,
                 "source": self.task.source,
                 "reason": reason or "processing_error",
             },
         )
-        if self._received and int(self._received) >= 2:
-            logger.error(
-                "Drop message",
-                extra={
-                    "queue": QUEUE,
-                    "source": self.task.source,
-                },
-            )
-            metrics.add_metric(name="TaskDrop", unit=MetricUnit.Count, value=1)
-            # Mark this completion explicitly as a drop after retries
-            self.ack("drop_after_retry")
-            return
+
+        metrics.add_metric(name="TaskFail", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(
+            name="TaskFailTime",
+            unit=MetricUnit.Milliseconds,
+            value=self.processing_time_ms,
+        )
         if self._receipt:
-            metrics.add_metric(name="TaskRetry", unit=MetricUnit.Count, value=1)
             self._client.change_message_visibility(
                 QueueUrl=self._queue_url,
                 ReceiptHandle=self._receipt,

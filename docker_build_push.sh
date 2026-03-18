@@ -7,8 +7,8 @@ AWS_REGION="eu-north-1"
 
 # Define FM and INVMODE combinations
 declare -A FM_VALUES
-FM_VALUES[stnd]="1 2 8 17"
-FM_VALUES[meso]="13 14 19 21 22 24"
+FM_VALUES[stnd]="1 2 8 17 102"
+FM_VALUES[meso]="13 14 19 21 22 24 113 119 121"
 
 # Get Git commit short hash
 GIT_HASH=$(git rev-parse --short HEAD)

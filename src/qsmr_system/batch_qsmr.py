@@ -20,6 +20,7 @@ MATLAB_ROOT = "/opt/MATLAB/R2024b"
 QUEUE_ENV = "QUEUE_NAME"
 
 QUEUE = os.environ.get(QUEUE_ENV, "Unknown")
+VISIBILITY_TIMEOUT_SECONDS = int(os.environ.get("VISIBILITY_TIMEOUT_SECONDS", "3600"))
 
 logger = Logger(service="QSMR")
 metrics = Metrics(namespace="QSMR", service=QUEUE)
@@ -149,6 +150,7 @@ def yield_queue_messages(queue_name=None):
             AttributeNames=["All"],
             MaxNumberOfMessages=1,
             WaitTimeSeconds=20,  # Long poll
+            VisibilityTimeout=VISIBILITY_TIMEOUT_SECONDS,
         )
         if "Messages" in response:
             for message in response["Messages"]:
